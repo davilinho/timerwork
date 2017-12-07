@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Work Timer</string>
+    <string name="blank"/>
+    <string name="calculating">Contando tiempo</string>
+    <string name="starting">Iniciado: %1$s</string>
+    <string name="stopped">Detenido: %1$s</string>
+    <string name="start">Iniciar</string>
+    <string name="stop">Detener</string>
+    <string name="finalize">Finalizar</string>
+    <string name="summary">Resumen diario (%1$s)</string>
+    <string name="history">Historial</string>
+    <string name="delete_his">Borrar historial</string>
+    <string name="snack_info">No se puede ver el historial, estando el contador en marcha</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="delete_his_question">¿Borrar el historial?</string>
+</resources>
