@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Work Timer</string>
     <string name="blank"/>
-    <string name="calculating">Contando tiempo</string>
+    <string name="calculating">Contando tiempo…</string>
     <string name="starting">Iniciado: %1$s</string>
     <string name="stopped">Detenido: %1$s</string>
     <string name="start">Iniciar</string>

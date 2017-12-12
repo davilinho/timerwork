@@ -17,21 +17,21 @@
         <TextView
             android:id="@+id/action"
             android:layout_width="0dp"
-            android:layout_weight="0.25"
+            android:layout_weight="0.55"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:layout_gravity="center_vertical"
             android:gravity="start"
             android:text="Inicio"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textAllCaps="true"
             android:textColor="@android:color/holo_red_dark"/>
 
         <TextView
             android:id="@+id/time"
             android:layout_width="0dp"
-            android:layout_weight="0.75"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:gravity="start"

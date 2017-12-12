@@ -17,12 +17,18 @@ class DateUtil {
             return SimpleDateFormat("dd/MM/yyyy").parse(SimpleDateFormat("dd/MM/yyyy").format(fromDate))
         }
 
-        @SuppressLint("SimpleDateFormat")
-        fun getDate(fromLong: Long): Date {
-            val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-            val calendar = Calendar.getInstance()
-            calendar.timeInMillis = fromLong
-            return Date(formatter.format(calendar.time))
+        fun getHoursAndMinutes(from: Long): String {
+            val totalSecs = from / 1000
+            val hours = totalSecs / 3600
+            val minutes = totalSecs / 60 % 60
+            val secs = totalSecs % 60
+            val minutesString = if (minutes == 0L) "00" else if (minutes < 10) "0$minutes" else "$minutes"
+            val secsString = if (secs == 0L) "00" else if (secs < 10) "0$secs" else "$secs"
+            return when {
+                hours > 0 -> "$hours:$minutesString:$secsString"
+                minutes > 0 -> "00:$minutesString:$secsString"
+                else -> "00:00:$secsString"
+            }
         }
 
         @SuppressLint("SimpleDateFormat")

@@ -38,10 +38,12 @@ class DataSource {
         for (item in results) {
             val amountSum = realm.where(AmountDay::class.java).equalTo("date", item.date)
                     .sum("amount")
-            val amount = AmountDay()
-            amount.amount = amountSum.toLong()
-            amount.date = item.date
-            finalList.add(amount)
+            if (amountSum != null) {
+                val amount = AmountDay()
+                amount.amount = amountSum.toLong()
+                amount.date = item.date
+                finalList.add(amount)
+            }
         }
         return finalList
     }

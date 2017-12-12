@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.davidroid.worktimer.R
+import com.davidroid.worktimer.dateUtil.DateUtil
 import com.davidroid.worktimer.model.AmountDay
 import kotlinx.android.synthetic.main.item.view.*
 import java.text.SimpleDateFormat
-import java.util.concurrent.TimeUnit
 
 /**
 * Created by davidmartin on 5/12/17.
@@ -32,9 +32,7 @@ class ItemAdapter(var data: MutableList<AmountDay> = mutableListOf()): RecyclerV
             with(view) {
                 with(data) {
                     action.text = SimpleDateFormat("dd/MM/yyyy").format(date)
-                    time.text = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toHours(amount.toLong()),
-                            TimeUnit.MILLISECONDS.toMinutes(amount.toLong())
-                                    - TimeUnit.MINUTES.toMinutes(TimeUnit.MILLISECONDS.toHours(amount.toLong())))
+                    time.text = DateUtil.getHoursAndMinutes(amount)
                 }
             }
         }

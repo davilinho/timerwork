@@ -1,11 +1,13 @@
 package com.davidroid.worktimer.view
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.NotificationCompat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -18,6 +20,8 @@ import com.davidroid.worktimer.model.AmountDay
 import com.davidroid.worktimer.presenter.Presenter
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+
+
 
 interface IView {
     fun createTimerFeedback()
@@ -40,6 +44,7 @@ class MainActivity : AppCompatActivity(), IView {
         recycler.adapter = adapter
 
         val sharedPref = getSharedPreferences()
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         startButton.setOnClickListener {
             supportActionBar?.title = getString(R.string.starting, DateUtil.getCurrentTime())
@@ -51,6 +56,13 @@ class MainActivity : AppCompatActivity(), IView {
             status.blinkAnimation(2500)
 
             sharedPref.edit().putLong(ActionType.START.name, Date().time).apply()
+
+            val builder = NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.calculating))
+                    .setOngoing(true)
+            notificationManager.notify(1, builder.build())
         }
         stopButton.setOnClickListener {
             supportActionBar?.title = getString(R.string.stopped, DateUtil.getCurrentTime())
@@ -62,6 +74,8 @@ class MainActivity : AppCompatActivity(), IView {
 
             val start = sharedPref.getLong(ActionType.START.name, 0)
             presenter.createTimer(start, Date().time)
+
+            notificationManager.cancelAll()
         }
     }
 
