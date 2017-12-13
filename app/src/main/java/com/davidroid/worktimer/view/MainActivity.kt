@@ -1,9 +1,13 @@
 package com.davidroid.worktimer.view
 
+import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.NotificationCompat
@@ -19,6 +23,7 @@ import com.davidroid.worktimer.model.AmountDay
 import com.davidroid.worktimer.presenter.Presenter
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+
 
 interface IView {
     fun createTimerFeedback()
@@ -126,12 +131,7 @@ class MainActivity : AppCompatActivity(), IView {
             getSharedPreferences().edit().putLong(ActionType.START.name, Date().time).apply()
         }
 
-        val builder = NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.calculating))
-                .setOngoing(true)
-        getNotificationManager().notify(1, builder.build())
+        showNotification()
     }
 
     private fun stopAction(forceStop: Boolean) {
@@ -149,6 +149,42 @@ class MainActivity : AppCompatActivity(), IView {
             presenter.createTimer(start, Date().time)
         }
 
+        hideNotification()
+    }
+
+    private fun showNotification() {
+        val channelId = "channel_01"
+        val importance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            NotificationManager.IMPORTANCE_HIGH
+        } else { TODO("VERSION.SDK_INT < N") }
+        val channel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel(channelId, channelId, importance)
+        } else { TODO("VERSION.SDK_INT < O") }
+
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        val intent = PendingIntent.getActivity(applicationContext, 0, notificationIntent, 0)
+
+        val notification = NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_watch_later_white_24dp)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.calculating))
+                .setOngoing(true)
+                .setChannelId(channelId)
+                .setContentIntent(intent)
+                .build()
+
+        val notificationManager = getNotificationManager()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        notification.flags = notification.flags or Notification.FLAG_NO_CLEAR
+
+        notificationManager.notify(1, notification)
+    }
+
+    private fun hideNotification() {
         getNotificationManager().cancelAll()
     }
 }
