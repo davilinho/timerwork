@@ -40,5 +40,10 @@ class DateUtil {
         fun getCurrentDay(): String {
             return SimpleDateFormat("dd/MM/yyyy").format(Date())
         }
+
+        @SuppressLint("SimpleDateFormat")
+        fun getTimeWithFormat(from: Long): String {
+            return SimpleDateFormat("dd/MM/yyyy HH:mm").format(Date(from).time)
+        }
     }
 }

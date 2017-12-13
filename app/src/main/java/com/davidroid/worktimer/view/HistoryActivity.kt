@@ -1,11 +1,13 @@
 package com.davidroid.worktimer.view
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.davidroid.worktimer.R
+import com.davidroid.worktimer.model.ActionType
 import com.davidroid.worktimer.model.AmountDay
 import com.davidroid.worktimer.presenter.HistoryPresenter
 import kotlinx.android.synthetic.main.activity_main.*
@@ -38,6 +40,8 @@ class HistoryActivity : AppCompatActivity(), IHistoryView {
         with(adapter) {
             data = timers.toMutableList()
             notifyDataSetChanged()
+            getSharedPreferences("startTimer", Context.MODE_PRIVATE)
+                    .edit().putLong(ActionType.START.name, 0).apply()
         }
     }
 

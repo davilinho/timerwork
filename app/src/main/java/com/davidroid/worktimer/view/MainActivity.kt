@@ -44,14 +44,18 @@ class MainActivity : AppCompatActivity(), IView {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         bindActions()
-
         recycler.adapter = adapter
+        setCurrentDay()
 
         if (savedInstanceState == null) {
             currentTimer = DateUtil.getCurrentTime()
             currentDay = DateUtil.getCurrentDay()
         }
-        setCurrentDay()
+
+        if (getSharedPreferences().getLong(ActionType.START.name, 0) > 0) {
+            currentTimer = DateUtil.getTimeWithFormat(getSharedPreferences().getLong(ActionType.START.name, 0))
+            startAction(false)
+        }
     }
 
     override fun onResume() {
@@ -130,6 +134,12 @@ class MainActivity : AppCompatActivity(), IView {
 
     private fun startAction(forceStart: Boolean) {
         currentState = ActionType.START
+
+        if (forceStart) {
+            currentTimer = DateUtil.getCurrentTime()
+            currentDay = DateUtil.getCurrentDay()
+        }
+
         supportActionBar?.title = getString(R.string.starting, currentTimer)
 
         startButton.visibility = View.GONE
@@ -158,6 +168,7 @@ class MainActivity : AppCompatActivity(), IView {
 
         if (forceStop) {
             presenter.createTimer(getSharedPreferences().getLong(ActionType.START.name, 0), Date().time)
+            getSharedPreferences().edit().putLong(ActionType.START.name, 0).apply()
             hideNotification()
         }
     }
