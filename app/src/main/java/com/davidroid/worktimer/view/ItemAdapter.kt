@@ -9,29 +9,29 @@ import com.davidroid.worktimer.R
 import com.davidroid.worktimer.dateUtil.DateUtil
 import com.davidroid.worktimer.model.AmountDay
 import kotlinx.android.synthetic.main.item.view.*
-import java.text.SimpleDateFormat
 
 /**
 * Created by davidmartin on 5/12/17.
 */
-class ItemAdapter(var data: MutableList<AmountDay> = mutableListOf()): RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
+class ItemAdapter(var data: MutableList<AmountDay> = mutableListOf()):
+        RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         return ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item, parent, false))
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.onBind(data[position])
+        holder.onBind(data[position], position)
     }
 
     override fun getItemCount() = data.size
 
     class ItemViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
-        @SuppressLint("SimpleDateFormat")
-        fun onBind(data: AmountDay) {
+        @SuppressLint("SimpleDateFormat", "StringFormatInvalid")
+        fun onBind(data: AmountDay, position: Int) {
             with(view) {
                 with(data) {
-                    action.text = SimpleDateFormat("dd/MM/yyyy").format(date)
+                    action.text = context.getString(R.string.pause_info, position + 1)
                     time.text = DateUtil.getHoursAndMinutes(amount)
                 }
             }

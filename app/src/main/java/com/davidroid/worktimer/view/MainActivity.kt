@@ -1,6 +1,5 @@
 package com.davidroid.worktimer.view
 
-import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -21,8 +20,6 @@ import com.davidroid.worktimer.presenter.Presenter
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
-
-
 interface IView {
     fun createTimerFeedback()
     fun showAllForToday(timers: List<AmountDay>)
@@ -32,56 +29,44 @@ class MainActivity : AppCompatActivity(), IView {
 
     private var presenter = Presenter(this)
     private val adapter = ItemAdapter(mutableListOf())
+    private var currentTimer: String = ""
+    private var currentDay: String = ""
+    private var currentState: ActionType = ActionType.STOP
 
-    @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
-        summaryTitle.text = getString(R.string.summary, DateUtil.getCurrentDay())
+        bindActions()
 
         recycler.adapter = adapter
 
-        val sharedPref = getSharedPreferences()
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (savedInstanceState != null) {
+            currentTimer = savedInstanceState.getString("currentTimer")
+            currentDay = savedInstanceState.getString("currentDay")
 
-        startButton.setOnClickListener {
-            supportActionBar?.title = getString(R.string.starting, DateUtil.getCurrentTime())
-            status.visibility = View.VISIBLE
-            status.text = getString(R.string.calculating)
-            startButton.visibility = View.GONE
-            stopButton.visibility = View.VISIBLE
-
-            status.blinkAnimation(2500)
-
-            sharedPref.edit().putLong(ActionType.START.name, Date().time).apply()
-
-            val builder = NotificationCompat.Builder(this)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(getString(R.string.app_name))
-                    .setContentText(getString(R.string.calculating))
-                    .setOngoing(true)
-            notificationManager.notify(1, builder.build())
+            if (ActionType.START.name == savedInstanceState.getString("actionType")) {
+                startAction(false)
+            } else {
+                stopAction(false)
+            }
+        } else {
+            currentTimer = DateUtil.getCurrentTime()
+            currentDay = DateUtil.getCurrentDay()
         }
-        stopButton.setOnClickListener {
-            supportActionBar?.title = getString(R.string.stopped, DateUtil.getCurrentTime())
-            status.visibility = View.GONE
-            startButton.visibility = View.VISIBLE
-            stopButton.visibility = View.GONE
-
-            status.stopAnimation()
-
-            val start = sharedPref.getLong(ActionType.START.name, 0)
-            presenter.createTimer(start, Date().time)
-
-            notificationManager.cancelAll()
-        }
+        setCurrentDay()
     }
 
     override fun onResume() {
         super.onResume()
         presenter.showAllForToday()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putString("currentTimer", currentTimer)
+        outState?.putString("currentDay", currentDay)
+        outState?.putString("actionType", currentState.name)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -111,8 +96,61 @@ class MainActivity : AppCompatActivity(), IView {
         }
     }
 
+    private fun bindActions() {
+        startButton.setOnClickListener { startAction(true) }
+        stopButton.setOnClickListener { stopAction(true) }
+    }
+
+    private fun setCurrentDay() {
+        summaryTitle.text = getString(R.string.summary, currentDay)
+    }
+
     private fun getSharedPreferences(): SharedPreferences
             = getSharedPreferences("startTimer", Context.MODE_PRIVATE)
+
+    private fun getNotificationManager(): NotificationManager
+            = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    private fun startAction(forceStart: Boolean) {
+        currentState = ActionType.START
+        supportActionBar?.title = getString(R.string.starting, currentTimer)
+
+        status.visibility = View.VISIBLE
+        status.text = getString(R.string.calculating)
+        startButton.visibility = View.GONE
+        stopButton.visibility = View.VISIBLE
+
+        status.blinkAnimation(2500)
+
+        if (forceStart) {
+            getSharedPreferences().edit().putLong(ActionType.START.name, Date().time).apply()
+        }
+
+        val builder = NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.calculating))
+                .setOngoing(true)
+        getNotificationManager().notify(1, builder.build())
+    }
+
+    private fun stopAction(forceStop: Boolean) {
+        currentState = ActionType.STOP
+        supportActionBar?.title = getString(R.string.stopped, currentTimer)
+
+        status.visibility = View.GONE
+        startButton.visibility = View.VISIBLE
+        stopButton.visibility = View.GONE
+
+        status.stopAnimation()
+
+        if (forceStop) {
+            val start = getSharedPreferences().getLong(ActionType.START.name, 0)
+            presenter.createTimer(start, Date().time)
+        }
+
+        getNotificationManager().cancelAll()
+    }
 }
 
 fun View.blinkAnimation(duration: Long) {
