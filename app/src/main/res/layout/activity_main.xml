@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context="com.davidroid.worktimer.view.MainActivity"
     android:orientation="vertical"
-    android:background="@android:color/white">
+    android:background="@color/colorPrimary">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -30,46 +30,37 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_margin="16dp"
-            android:text="@string/stopped"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:visibility="gone"/>
-
         <Button
             android:id="@+id/startButton"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_gravity="center"
             android:text="@string/start"
-            android:textSize="20sp"
-            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"
             android:background="@drawable/rounded_button"/>
 
         <Button
             android:id="@+id/stopButton"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:layout_gravity="center"
             android:text="@string/finalize"
-            android:textSize="16sp"
-            android:textColor="@color/colorAccent"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"
             android:background="@drawable/rounded_button_secondary"
             android:visibility="gone"/>
 
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/summaryBlock"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1.5"
         android:orientation="vertical"
-        android:background="@color/colorPrimary">
+        android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="match_parent"

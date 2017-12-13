@@ -103,6 +103,11 @@ class MainActivity : AppCompatActivity(), IView {
     override fun showAllForToday(timers: List<AmountDay>) {
         with(adapter) {
             data = timers.toMutableList()
+            if (data.size > 0) {
+                summaryBlock.visibility = View.VISIBLE
+            } else {
+                summaryBlock.visibility = View.INVISIBLE
+            }
             notifyDataSetChanged()
             if (!timers.isEmpty()) { recycler.smoothScrollToPosition(timers.size - 1) }
         }
@@ -127,12 +132,12 @@ class MainActivity : AppCompatActivity(), IView {
         currentState = ActionType.START
         supportActionBar?.title = getString(R.string.starting, currentTimer)
 
-        status.visibility = View.VISIBLE
-        status.text = getString(R.string.calculating)
         startButton.visibility = View.GONE
         stopButton.visibility = View.VISIBLE
+        stopButton.blinkAnimation(3500, 0.25f)
 
-        status.blinkAnimation(2500)
+        summaryTitle.text = getString(R.string.calculating)
+        summaryTitle.blinkAnimation(1500)
 
         if (forceStart) {
             getSharedPreferences().edit().putLong(ActionType.START.name, Date().time).apply()
@@ -142,15 +147,16 @@ class MainActivity : AppCompatActivity(), IView {
 
     private fun stopAction(forceStop: Boolean) {
         currentState = ActionType.STOP
+        supportActionBar?.title = getString(R.string.stopped, currentTimer)
 
-        status.visibility = View.GONE
         startButton.visibility = View.VISIBLE
         stopButton.visibility = View.GONE
+        stopButton.stopAnimation()
 
-        status.stopAnimation()
+        setCurrentDay()
+        summaryTitle.stopAnimation()
 
         if (forceStop) {
-            supportActionBar?.title = getString(R.string.stopped, currentTimer)
             presenter.createTimer(getSharedPreferences().getLong(ActionType.START.name, 0), Date().time)
             hideNotification()
         }
@@ -200,8 +206,8 @@ class MainActivity : AppCompatActivity(), IView {
     }
 }
 
-fun View.blinkAnimation(duration: Long) {
-    val anim = AlphaAnimation(0.0f, 0.75f)
+fun View.blinkAnimation(duration: Long, minAlpha: Float = 0.0f, maxAlpha: Float = 1.0f) {
+    val anim = AlphaAnimation(minAlpha, maxAlpha)
     anim.duration = duration
     anim.startOffset = 20
     anim.repeatMode = Animation.REVERSE
