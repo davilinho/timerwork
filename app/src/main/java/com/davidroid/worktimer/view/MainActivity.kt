@@ -1,5 +1,6 @@
 package com.davidroid.worktimer.view
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -46,16 +47,7 @@ class MainActivity : AppCompatActivity(), IView {
 
         recycler.adapter = adapter
 
-        if (savedInstanceState != null) {
-            currentTimer = savedInstanceState.getString("currentTimer")
-            currentDay = savedInstanceState.getString("currentDay")
-
-            if (ActionType.START.name == savedInstanceState.getString("actionType")) {
-                startAction(false)
-            } else {
-                stopAction(false)
-            }
-        } else {
+        if (savedInstanceState == null) {
             currentTimer = DateUtil.getCurrentTime()
             currentDay = DateUtil.getCurrentDay()
         }
@@ -72,6 +64,21 @@ class MainActivity : AppCompatActivity(), IView {
         outState?.putString("currentTimer", currentTimer)
         outState?.putString("currentDay", currentDay)
         outState?.putString("actionType", currentState.name)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        if (savedInstanceState != null) {
+            currentTimer = savedInstanceState.getString("currentTimer")
+            currentDay = savedInstanceState.getString("currentDay")
+
+            if (ActionType.START.name == savedInstanceState.getString("actionType")) {
+                startAction(false)
+            } else {
+                stopAction(false)
+            }
+        }
+        setCurrentDay()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -129,14 +136,12 @@ class MainActivity : AppCompatActivity(), IView {
 
         if (forceStart) {
             getSharedPreferences().edit().putLong(ActionType.START.name, Date().time).apply()
+            showNotification()
         }
-
-        showNotification()
     }
 
     private fun stopAction(forceStop: Boolean) {
         currentState = ActionType.STOP
-        supportActionBar?.title = getString(R.string.stopped, currentTimer)
 
         status.visibility = View.GONE
         startButton.visibility = View.VISIBLE
@@ -145,43 +150,49 @@ class MainActivity : AppCompatActivity(), IView {
         status.stopAnimation()
 
         if (forceStop) {
-            val start = getSharedPreferences().getLong(ActionType.START.name, 0)
-            presenter.createTimer(start, Date().time)
+            supportActionBar?.title = getString(R.string.stopped, currentTimer)
+            presenter.createTimer(getSharedPreferences().getLong(ActionType.START.name, 0), Date().time)
+            hideNotification()
         }
-
-        hideNotification()
     }
 
+    @SuppressLint("NewApi")
     private fun showNotification() {
-        val channelId = "channel_01"
-        val importance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            NotificationManager.IMPORTANCE_HIGH
-        } else { TODO("VERSION.SDK_INT < N") }
-        val channel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel(channelId, channelId, importance)
-        } else { TODO("VERSION.SDK_INT < O") }
-
         val notificationIntent = Intent(this, MainActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         val intent = PendingIntent.getActivity(applicationContext, 0, notificationIntent, 0)
 
-        val notification = NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_watch_later_white_24dp)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.calculating))
-                .setOngoing(true)
-                .setChannelId(channelId)
-                .setContentIntent(intent)
-                .build()
-
-        val notificationManager = getNotificationManager()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "channel_01"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(channelId, channelId, importance)
+
+            val notification = NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_watch_later_white_24dp)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.calculating))
+                    .setOngoing(true)
+                    .setChannelId(channelId)
+                    .setContentIntent(intent)
+                    .build()
+
+            val notificationManager = getNotificationManager()
             notificationManager.createNotificationChannel(channel)
+            notification.flags = notification.flags or Notification.FLAG_NO_CLEAR
+            notificationManager.notify(1, notification)
+        } else {
+            val notification = NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_watch_later_white_24dp)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.calculating))
+                    .setOngoing(true)
+                    .setContentIntent(intent)
+                    .build()
+
+            val notificationManager = getNotificationManager()
+            notification.flags = notification.flags or Notification.FLAG_NO_CLEAR
+            notificationManager.notify(1, notification)
         }
-
-        notification.flags = notification.flags or Notification.FLAG_NO_CLEAR
-
-        notificationManager.notify(1, notification)
     }
 
     private fun hideNotification() {
