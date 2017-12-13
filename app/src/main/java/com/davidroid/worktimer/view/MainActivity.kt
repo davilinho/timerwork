@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity(), IView {
             currentDay = DateUtil.getCurrentDay()
         }
 
-        if (getSharedPreferences().getLong(ActionType.START.name, 0) > 0) {
+        if (getStoredTime() > 0) {
             startAction(false)
         }
     }
@@ -128,24 +128,21 @@ class MainActivity : AppCompatActivity(), IView {
     private fun getSharedPreferences(): SharedPreferences
             = getSharedPreferences("startTimer", Context.MODE_PRIVATE)
 
+    private fun getStoredTime(): Long = getSharedPreferences().getLong(ActionType.START.name, 0)
+
     private fun getNotificationManager(): NotificationManager
             = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private fun startAction(forceStart: Boolean) {
         currentState = ActionType.START
+        currentDay = DateUtil.getCurrentDay()
 
-        if (forceStart) {
-            currentTimer = DateUtil.getCurrentTime()
-            currentDay = DateUtil.getCurrentDay()
-        } else {
-            currentTimer = getSharedPreferences().getLong(ActionType.START.name, 0).toString()
-        }
+        currentTimer = if (forceStart) { DateUtil.getCurrentTime() } else { getStoredTime().toString() }
 
-        if (getSharedPreferences().getLong(ActionType.START.name, 0) > 0) {
-            supportActionBar?.title =
-                    DateUtil.getTimeWithFormat(getSharedPreferences().getLong(ActionType.START.name, 0))
+        supportActionBar?.title = if (getStoredTime() > 0) {
+            DateUtil.getTimeWithFormat(getStoredTime())
         } else {
-            supportActionBar?.title = getString(R.string.starting, currentTimer)
+            getString(R.string.starting, currentTimer)
         }
 
         startButton.visibility = View.GONE
@@ -163,7 +160,7 @@ class MainActivity : AppCompatActivity(), IView {
 
     private fun stopAction(forceStop: Boolean) {
         currentState = ActionType.STOP
-        supportActionBar?.title = getString(R.string.stopped, currentTimer)
+        supportActionBar?.title = getString(R.string.stopped, DateUtil.getCurrentTime())
 
         startButton.visibility = View.VISIBLE
         stopButton.visibility = View.GONE
@@ -173,7 +170,7 @@ class MainActivity : AppCompatActivity(), IView {
         summaryTitle.stopAnimation()
 
         if (forceStop) {
-            presenter.createTimer(getSharedPreferences().getLong(ActionType.START.name, 0), Date().time)
+            presenter.createTimer(getStoredTime(), Date().time)
             getSharedPreferences().edit().putLong(ActionType.START.name, 0).apply()
             hideNotification()
         }
