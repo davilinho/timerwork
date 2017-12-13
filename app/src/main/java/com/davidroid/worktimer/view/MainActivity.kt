@@ -53,7 +53,6 @@ class MainActivity : AppCompatActivity(), IView {
         }
 
         if (getSharedPreferences().getLong(ActionType.START.name, 0) > 0) {
-            currentTimer = DateUtil.getTimeWithFormat(getSharedPreferences().getLong(ActionType.START.name, 0))
             startAction(false)
         }
     }
@@ -138,9 +137,16 @@ class MainActivity : AppCompatActivity(), IView {
         if (forceStart) {
             currentTimer = DateUtil.getCurrentTime()
             currentDay = DateUtil.getCurrentDay()
+        } else {
+            currentTimer = getSharedPreferences().getLong(ActionType.START.name, 0).toString()
         }
 
-        supportActionBar?.title = getString(R.string.starting, currentTimer)
+        if (getSharedPreferences().getLong(ActionType.START.name, 0) > 0) {
+            supportActionBar?.title =
+                    DateUtil.getTimeWithFormat(getSharedPreferences().getLong(ActionType.START.name, 0))
+        } else {
+            supportActionBar?.title = getString(R.string.starting, currentTimer)
+        }
 
         startButton.visibility = View.GONE
         stopButton.visibility = View.VISIBLE
